@@ -109,8 +109,19 @@ class LinkSchemaTest < MiniTest::Unit::TestCase
   # require parameters.
   def test_parameter_details_without_parameters
     schema = Heroics::Schema.new(SAMPLE_SCHEMA)
-    link = schema.resource('resource').link('list')
+    link = schema.resource('another-resource').link('create')
     assert_equal([], link.parameter_details)
+  end 
+
+  # LinkSchema.parameter_details returns an options parameter if the
+  # link is for a collection of instances.
+  def test_parameter_details_with_collection_options_parameter
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    link = schema.resource('resource').link('list')
+    parameters = link.parameter_details
+    parameter = parameters[0]
+    assert_equal('collection_options', parameter.name)
+    assert_equal('additional collection options to pass with the request', parameter.description)
   end
 
   # LinkSchema.parameter_details returns an array of Parameter with information
