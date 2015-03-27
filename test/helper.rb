@@ -184,6 +184,11 @@ SAMPLE_SCHEMA = {
       'properties' => {},
 
       'links' => [
+        {'description' => 'Create another resource',
+         'href'        => '/another-resource',
+         'method'      => 'POST',
+         'rel'         => 'self',
+         'title'       => 'Create'},
         {'description' => 'Show all sample resources',
          'href'        => '/another-resource',
          'method'      => 'GET',

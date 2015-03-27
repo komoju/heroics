@@ -158,11 +158,10 @@ module Heroics
     #   `description` key/value pairs describing parameters.
     def parameter_details
       parameter_names = link_schema['href'].scan(PARAMETER_REGEX)
-      resolve_parameter_details(parameter_names)
-    end
-
-    def needs_request_body?
-      return link_schema.has_key?('schema')
+      parameters = resolve_parameter_details(parameter_names)
+      parameters << CollectionOptions.new if requires_collection_options?
+      parameters << BodyParameter.new if requires_request_body?
+      parameters
     end
 
     # Get an example request body.
@@ -220,6 +219,14 @@ module Heroics
     # @param [Hash] The raw link schema.
     def link_schema
       @schema['definitions'][@resource_name]['links'][@link_index]
+    end
+
+    def requires_collection_options?
+      return link_schema['rel'] == 'instances'
+    end
+
+    def requires_request_body?
+      return link_schema.has_key?('schema')
     end
 
     # Get the names of the parameters this link expects.
@@ -349,9 +356,24 @@ module Heroics
     Schema.new(MultiJson.load(response.body))
   end
 
+  # The base parameter class
+  class BaseParameter
+    attr_reader :name, :description
+
+    # This is the used for generating the function signature
+    def signature
+      @name
+    end
+
+    # A pretty representation of a parameter instance
+    def inspect
+      "#{self.class}(name=#{@name}, description=#{@description})"
+    end
+  end
+
   # A representation of a parameter.
-  class Parameter
-    attr_reader :resource_name, :description
+  class Parameter < BaseParameter
+    attr_reader :resource_name
 
     def initialize(resource_name, name, description)
       @resource_name = resource_name
@@ -364,15 +386,30 @@ module Heroics
     def name
       [@resource_name, @name].compact.join("_")
     end
+  end
 
-    # A pretty representation of this instance.
-    def inspect
-      "Parameter(name=#{@name}, description=#{@description})"
+  # A representation of a body parameter.
+  class BodyParameter < BaseParameter
+    def initialize
+      @name = 'body'
+      @description = 'the object to pass as the request payload'
+    end
+  end
+
+  # Additional options to pass with a request
+  class CollectionOptions < BaseParameter
+    def initialize
+      @name = 'collection_options'
+      @description = 'additional collection options to pass with the request'
+    end
+
+    def signature
+      "#{@name} = {}"  
     end
   end
 
   # A representation of a set of parameters.
-  class ParameterChoice
+  class ParameterChoice < BaseParameter
     attr_reader :resource_name, :parameters
 
     def initialize(resource_name, parameters)

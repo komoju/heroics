@@ -29,8 +29,7 @@ module Heroics
       resource_schema.links.each do |link_schema|
         links << GeneratorLink.new(link_schema.name.gsub('-', '_'),
                                    link_schema.description,
-                                   link_schema.parameter_details,
-                                   link_schema.needs_request_body?)
+                                   link_schema.parameter_details)
       end
       resources << GeneratorResource.new(resource_schema.name.gsub('-', '_'),
                                          resource_schema.description,
@@ -66,20 +65,22 @@ module Heroics
   # A representation of a link for use when generating source code in the
   # template.
   class GeneratorLink
-    attr_reader :name, :description, :parameters, :takes_body
+    attr_reader :name, :description, :parameters
 
-    def initialize(name, description, parameters, takes_body)
+    def initialize(name, description, parameters)
       @name = name
       @description = description
       @parameters = parameters
-      if takes_body
-        parameters << BodyParameter.new
-      end
+    end
+
+    # List of parameters for the method signature
+    def signatures
+      @parameters.map { |info| info.signature }.join(', ')
     end
 
     # The list of parameters to render in generated source code for the method
     # signature for the link.
-    def parameter_names
+    def parameter_list
       @parameters.map { |info| info.name }.join(', ')
     end
   end
@@ -92,15 +93,5 @@ module Heroics
       text.sub!(replace) { |match| match.upcase }
     end
     text
-  end
-
-  # A representation of a body parameter.
-  class BodyParameter
-    attr_reader :name, :description
-
-    def initialize
-      @name = 'body'
-      @description = 'the object to pass as the request payload'
-    end
   end
 end
