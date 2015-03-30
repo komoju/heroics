@@ -358,11 +358,11 @@ module Heroics
 
   # The base parameter class
   class BaseParameter
-    attr_reader :name, :description
+    attr_reader :resource_name, :name, :description
 
     # This is the used for generating the function signature
     def signature
-      @name
+      [@resource_name, @name].compact.join("_")
     end
 
     # A pretty representation of a parameter instance
@@ -373,8 +373,6 @@ module Heroics
 
   # A representation of a parameter.
   class Parameter < BaseParameter
-    attr_reader :resource_name
-
     def initialize(resource_name, name, description)
       @resource_name = resource_name
       @name = name
@@ -410,7 +408,7 @@ module Heroics
 
   # A representation of a set of parameters.
   class ParameterChoice < BaseParameter
-    attr_reader :resource_name, :parameters
+    attr_reader :parameters
 
     def initialize(resource_name, parameters)
       @resource_name = resource_name
@@ -427,6 +425,10 @@ module Heroics
           "#{@resource_name}_#{parameter.name}"
         end
       end.join('_or_')
+    end
+
+    def signature
+      name
     end
 
     # A description created by merging individual parameter descriptions.

@@ -121,6 +121,7 @@ class LinkSchemaTest < MiniTest::Unit::TestCase
     parameters = link.parameter_details
     parameter = parameters[0]
     assert_equal('collection_options', parameter.name)
+    assert_equal('collection_options = {}', parameter.signature)
     assert_equal('additional collection options to pass with the request', parameter.description)
   end
 
@@ -133,6 +134,7 @@ class LinkSchemaTest < MiniTest::Unit::TestCase
     assert_equal(1, parameters.length)
     parameter = parameters[0]
     assert_equal('resource_uuid_field', parameter.name)
+    assert_equal('resource_uuid_field', parameter.signature)
     assert_equal('A sample UUID field', parameter.description)
   end
 
@@ -146,6 +148,7 @@ class LinkSchemaTest < MiniTest::Unit::TestCase
     assert_equal(1, parameters.length)
     parameter = parameters[0]
     assert_equal('resource_uuid_field_or_resource_email_field', parameter.name)
+    assert_equal('resource_uuid_field_or_resource_email_field', parameter.signature)
     assert_equal('A sample UUID field or A sample email address field',
                  parameter.description)
   end
