@@ -159,8 +159,11 @@ module Heroics
     def parameter_details
       parameter_names = link_schema['href'].scan(PARAMETER_REGEX)
       parameters = resolve_parameter_details(parameter_names)
-      parameters << CollectionOptions.new if requires_collection_options?
-      parameters << BodyParameter.new if requires_request_body?
+      if requires_collection_options?
+        parameters << CollectionOptions.new
+      elsif requires_request_body?
+        parameters << BodyParameter.new
+      end
       parameters
     end
 
